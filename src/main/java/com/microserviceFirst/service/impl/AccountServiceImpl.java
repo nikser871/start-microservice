@@ -3,7 +3,7 @@ package com.microserviceFirst.service.impl;
 import com.microserviceFirst.constants.AccountsConstants;
 import com.microserviceFirst.dto.AccountDto;
 import com.microserviceFirst.dto.CustomerDto;
-import com.microserviceFirst.entity.Account;
+import com.microserviceFirst.entity.Accounts;
 import com.microserviceFirst.entity.Customer;
 import com.microserviceFirst.exception.CustomerAlreadyExistsException;
 import com.microserviceFirst.exception.ResourceNotFoundException;
@@ -39,8 +39,6 @@ public class AccountServiceImpl implements IAccountService {
                     +customerDto.getMobileNumber());
         }
 
-        customer.setCreatedAt(LocalDateTime.now());
-        customer.setCreatedBy("Anonymous");
         Customer savedCustomer = customerRepository.save(customer);
         accountRepository.save(createNewAccount(savedCustomer));
 
@@ -51,7 +49,7 @@ public class AccountServiceImpl implements IAccountService {
         Customer customer = customerRepository.findByMobileNumber(mobileNumber)
                 .orElseThrow(() -> new ResourceNotFoundException("Customer", "mobilePhone", mobileNumber));
 
-        Account account = accountRepository.findByCustomerId(customer.getCustomerId()).orElseThrow(
+        Accounts account = accountRepository.findByCustomerId(customer.getCustomerId()).orElseThrow(
                 () -> new ResourceNotFoundException("Account", "customerId", customer.getCustomerId().toString())
         );
 
@@ -66,7 +64,7 @@ public class AccountServiceImpl implements IAccountService {
         boolean isUpdated = false;
         AccountDto accountsDto = customerDto.getAccountDto();
         if(accountsDto !=null ){
-            Account accounts = accountRepository.findById(accountsDto.getAccountNumber()).orElseThrow(
+            Accounts accounts = accountRepository.findById(accountsDto.getAccountNumber()).orElseThrow(
                     () -> new ResourceNotFoundException("Account", "AccountNumber", accountsDto.getAccountNumber().toString())
             );
             AccountMapper.mapToAccounts(accountsDto, accounts);
@@ -83,20 +81,30 @@ public class AccountServiceImpl implements IAccountService {
         return  isUpdated;
     }
 
+    @Override
+    public boolean deleteAccount(String mobileNumber) {
+        Customer customer = customerRepository.findByMobileNumber(mobileNumber).orElseThrow(
+                () -> new ResourceNotFoundException("Customer", "mobileNumber", mobileNumber)
+        );
+        accountRepository.deleteByCustomerId(customer.getCustomerId());
+        customerRepository.deleteById(customer.getCustomerId());
+        return true;
+    }
+
     /**
      * @param customer - Customer Object
      * @return the new account details
      */
-    private Account createNewAccount(Customer customer) {
-        Account newAccount = new Account();
+    private Accounts createNewAccount(Customer customer) {
+        Accounts newAccount = new Accounts();
         newAccount.setCustomerId(customer.getCustomerId());
         long randomAccNumber = 1000000000L + new Random().nextInt(900000000);
 
         newAccount.setAccountNumber(randomAccNumber);
         newAccount.setAccountType(AccountsConstants.SAVINGS);
         newAccount.setBranchAddress(AccountsConstants.ADDRESS);
-        newAccount.setCreatedAt(LocalDateTime.now());
-        newAccount.setCreatedBy("Anonymous");
         return newAccount;
     }
+
+
 }

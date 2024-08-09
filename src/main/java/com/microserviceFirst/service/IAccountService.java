@@ -1,7 +1,7 @@
 package com.microserviceFirst.service;
 
 import com.microserviceFirst.dto.CustomerDto;
-import com.microserviceFirst.entity.Account;
+
 
 public interface IAccountService {
 
@@ -20,4 +20,6 @@ public interface IAccountService {
     CustomerDto fetchAccount(String mobileNumber);
 
     boolean updateAccount(CustomerDto customerDto);
+
+    boolean deleteAccount(String mobileNumber);
 }

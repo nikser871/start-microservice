@@ -10,7 +10,7 @@ import lombok.*;
 @AllArgsConstructor
 @Builder
 @Entity
-public class Account extends BaseEntity {
+public class Accounts extends BaseEntity {
 
     @Id
     @Column(name = "account_number")
